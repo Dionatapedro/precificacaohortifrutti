@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Precificação Ceasa</title>
+
+<style>
+  body {
+    font-family: 'Segoe UI', Arial;
+    margin: 0;
+    background: #f4f6f8;
+  }
+
+  .header {
+    background: #1636c0;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .header img {
+    height: 50px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .busca {
+    margin-left: auto;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    width: 180px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  th {
+    background: #1636c0;
+    color: white;
+    padding: 12px;
+  }
+
+  td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  input {
+    width: 90px;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+
+  .custo { color: #7f8c8d; font-weight: bold; }
+  .varejo { color: #27ae60; font-weight: bold; }
+  .atacado { color: #2980b9; font-weight: bold; }
+
+  .btn-limpar {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.btn-limpar:hover {
+  background: #c0392b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <img src="logo.png">
+  <h1>Precificação de Hortifruti</h1>
+
+  <input type="text" id="busca" placeholder="🔍 Buscar..." class="busca">
+
+  <button onclick="limparDados()" class="btn-limpar">
+    🗑 Limpar
+  </button>
+</div>
+<div class="container">
+<table>
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Valor Caixa</th>
+      <th>Custo</th>
+      <th>Venda (kg)</th>
+      <th>Caixa (kg)</th>
+    </tr>
+  </thead>
+  <tbody id="tabela"></tbody>
+</table>
+</div>
+
+<script>
+const produtos = [
+  { nome: "Tomate", peso: 20 },
+  { nome: "Batata", peso: 25 },
+  { nome: "Cebola", peso: 30 },
+  { nome: "Cenoura", peso: 22 },
+  { nome: "Batata doce", peso: 20 },
+  { nome: "Abobrinha", peso: 18 },
+  { nome: "Berinjela", peso: 16 },
+  { nome: "Pimentão", peso: 12 },
+  { nome: "Pepino", peso: 20 },
+  { nome: "Alho", peso: 10 }
+];
+
+// arredondar final 9
+function arredondarPara9(valor) {
+  let inteiro = Math.floor(valor);
+  let centavos = Math.round((valor - inteiro) * 100);
+
+  if (centavos % 10 === 9) return valor.toFixed(2);
+
+  let novoCentavo = Math.floor(centavos / 10) * 10 + 9;
+
+  if (novoCentavo > 99) {
+    inteiro += 1;
+    novoCentavo = 9;
+  }
+
+  return (inteiro + novoCentavo / 100).toFixed(2);
+}
+
+// cálculo
+function calcular(valor, peso) {
+  let custo = valor / peso;
+  let varejo = arredondarPara9(custo * 1.45);
+  let atacado = (valor * 1.40) / peso;
+
+  return {
+    custo: custo.toFixed(2),
+    varejo,
+    atacado: atacado.toFixed(2)
+  };
+}
+
+const tabela = document.getElementById("tabela");
+
+produtos.forEach((produto, index) => {
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${produto.nome}</td>
+    <td><input type="number" id="input-${index}"></td>
+    <td class="custo" id="custo-${index}">-</td>
+    <td class="varejo" id="varejo-${index}">-</td>
+    <td class="atacado" id="atacado-${index}">-</td>
+  `;
+
+  tabela.appendChild(tr);
+
+  const input = tr.querySelector("input");
+
+  // 🔥 CARREGAR SALVO
+  const valorSalvo = localStorage.getItem(`produto-${index}`);
+  if (valorSalvo) {
+    input.value = valorSalvo;
+
+    const resultado = calcular(parseFloat(valorSalvo), produto.peso);
+
+    document.getElementById(`custo-${index}`).innerText = resultado.custo;
+    document.getElementById(`varejo-${index}`).innerText = resultado.varejo;
+    document.getElementById(`atacado-${index}`).innerText = resultado.atacado;
+  }
+
+  // 🔥 SALVAR AO DIGITAR
+  input.addEventListener("input", () => {
+    const valor = parseFloat(input.value);
+    if (!valor) return;
+
+    const resultado = calcular(valor, produto.peso);
+
+    document.getElementById(`custo-${index}`).innerText = resultado.custo;
+    document.getElementById(`varejo-${index}`).innerText = resultado.varejo;
+    document.getElementById(`atacado-${index}`).innerText = resultado.atacado;
+
+    localStorage.setItem(`produto-${index}`, valor);
+  });
+});
+
+// 🔍 BUSCA
+const busca = document.getElementById("busca");
+
+busca.addEventListener("input", () => {
+  const termo = busca.value.toLowerCase();
+  const linhas = document.querySelectorAll("#tabela tr");
+
+  linhas.forEach(linha => {
+    const nomeProduto = linha.children[0].innerText.toLowerCase();
+    linha.style.display = nomeProduto.includes(termo) ? "" : "none";
+  });
+});
+
+function limparDados() {
+  const confirmar = confirm("Tem certeza que deseja apagar todos os dados?");
+
+  if (confirmar) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>
