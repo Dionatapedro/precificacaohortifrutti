@@ -1,337 +1,391 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<title>Precificação Ceasa</title>
+  <meta charset="UTF-8">
+  <title>Precificação Ceasa</title>
 
-<style>
-  body {
-    font-family: 'Segoe UI', Arial;
-    margin: 0;
-    background: #f4f6f8;
-  }
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #f4f6f8;
+    }
 
-  .header {
-    background: #1636c0;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
+    .header {
+      background: #0c33ba;
+      color: white;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-  .header img {
-    height: 50px;
-  }
+    .busca {
+      margin-left: auto;
+      padding: 5px;
+    }
 
-  .header h1 {
-    font-size: 20px;
-    margin: 0;
-  }
+    button {
+      padding: 6px 10px;
+      background: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-  .busca {
-    margin-left: auto;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: none;
-    font-size: 13px;
-    width: 180px;
-  }
+    .container {
+      padding: 20px;
+    }
 
-  .container {
-    padding: 20px;
-  }
+    table {
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  }
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+    }
 
-  th {
-    background: #1636c0;
-    color: white;
-    padding: 12px;
-  }
+    th,
+    td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
 
-  td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-  }
+    .area-botao {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
 
-  input {
-    width: 90px;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    text-align: center;
-  }
+    .btn-gerarListaCod {
+      background: green;
+      width: 200px;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-  .custo { color: #7f8c8d; font-weight: bold; }
-  .varejo { color: #27ae60; font-weight: bold; }
-  .atacado { color: #2980b9; font-weight: bold; }
+    footer{
+      background-color: black;
+      color: white;
+      text-align: right;
+      font-size: 13px;
+      padding: 2px 0;
+    }
 
-  .btn-limpar {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 7px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: 0.2s;
-}
-
-.btn-limpar:hover {
-  background: #c0392b;
-}
-</style>
+    .img-logo{
+      width: 120px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">
-  <img src="logo.png">
-  <h1>Precificação de Hortifruti</h1>
+  <div class="header">
+    <img src="logo.png" alt="" class="img-logo">
+    <h2>Precificação Ceasa JP</h2>
+    <input id="busca" class="busca" placeholder="Buscar...">
+    <button onclick="limpar()">Limpar</button> <br>
 
-  <input type="text" id="busca" placeholder="🔍 Buscar..." class="busca">
+  </div>
 
-  <button onclick="limparDados()" class="btn-limpar">
-    🗑 Limpar
-  </button>
-</div>
-<div class="container">
-<table>
-  <thead>
-    <tr>
-      <th>Produto</th>
-      <th>Valor Caixa</th>
-      <th>Custo</th>
-      <th>Venda (kg)</th>
-      <th>Caixa (kg)</th>
-    </tr>
-  </thead>
-  <tbody id="tabela"></tbody>
-</table>
-</div>
+  <div class="container">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Produto</th>
+          <th>Valor Caixa</th>
+          <th>Custo</th>
+          <th>Venda</th>
+          <th>Atacado</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="tabela"></tbody>
+    </table>
+  </div>
 
-<script>
-const produtos = [
-  { nome: "Abacate", peso: 18 },
-  { nome: "Abobrinha Princesa", peso: 18 },
-  { nome: "Abobrinha Verde", peso: 18 },
-  { nome: "Alho Poró", peso: 1 },
-  { nome: "Banana Nanica", peso: 20},
-  { nome: "Banana Ouro", peso: 20},
-  { nome: "Banana Prata", peso: 20},
-  { nome: "Banana Terra", peso: 20},
-  { nome: "Bucha Vegetal", peso: 1 },
-  { nome: "Batata Doce", peso: 20 },
-  { nome: "Acafrão", peso: 1 },
-  { nome: "Berinjela", peso: 10 },
-  { nome: "Beterraba", peso: 20 },
-  { nome: "Goiaba", peso: 18 },
-  { nome: "Jiló", peso: 14 },
-  { nome: "Limao Tahiti", peso: 20 },
-  { nome: "Limao Doce", peso: 18 },
-  { nome: "Mandioca", peso: 18 },
-  { nome: "Mamão Avai", peso: 10 },
-  { nome: "Mamão Formoso", peso: 10 },
-  { nome: "Maracujá", peso: 1 },
-  { nome: "Mexerica Pokan", peso: 16},
-  { nome: "Cará Branco", peso: 18},
-  { nome: "Batata Doce Branca", peso: 20},
-  { nome: "Hortelã", peso: 1},
-  { nome: "Mexerica Bergamota", peso: 10},
-  { nome: "Carambola", peso: 6},
-  { nome: "Chuchu", peso: 20},
-  { nome: "Gengibre", peso:18 },
-  { nome: "Pimentão Colorido", peso: 10},
-  { nome: "Pepino", peso: 18},
-  { nome: "Pepino Japonês", peso: 18},
-  { nome: "Inhame", peso: 20},
-  { nome: "Repolho", peso: 15},
-  { nome: "Repolho Roxo", peso: 15},
-  { nome: "Tomate Cereja", peso: 20},
-  { nome: "Vagem", peso: 10},
-  { nome: "Vagem Verde", peso: 10},
-  { nome: "Ovos Codorna", peso: 20},
-  { nome: "Ovos Codorna Balde", peso: 1},
-  { nome: "Ovos Sacola", peso: 1},
-  { nome: "Coco Seco", peso: 20},
-  { nome: "Coco Verde", peso: 1},
-  { nome: "Abacaxi", peso: 1},
-  { nome: "Palmito", peso: 1},
-  { nome: "Milho Verde Bdj", peso: 1},
-  { nome: "Graviola", peso: 8},
-  { nome: "Manga Ouro", peso: 18},
-  { nome: "Pimenta Dedo de Moça", peso: 1},
-  { nome: "Abobora Jacaré", peso: 40},
-  { nome: "Abobora Japonesa", peso: 40},
-  { nome: "Abobora Maranhão", peso: 40},
-  { nome: "Melancia", peso: 1},
-  { nome: "Melancia Baby", peso: 16},
-  { nome: "Batata Roxa", peso: 25},
-  { nome: "Batata Inglesa", peso: 25},
-  { nome: "Batatinha", peso: 25},
-  { nome: "Cebola Pequena", peso: 20},
-  { nome: "Cebola Grande", peso: 20},
-  { nome: "Cenoura", peso: 20},
-  { nome: "Alho Importado", peso: 10},
-  { nome: "Alho Nacional", peso: 10},
-  { nome: "Cebola Roxa", peso: 20},
-  { nome: "Alho Embalado", peso: 15},
-  { nome: "Amendoim torrado c/ casca", peso: 10},
-  { nome: "Amendoim c/ casca", peso: 10},
-  { nome: "Melão Sapo", peso: 13},
-  { nome: "Melão Dino", peso: 10},
-  { nome: "Melão Cepi Amarelo", peso: 10},
-  { nome: "Melão Meluna", peso: 10},
-  { nome: "Melão Famosa", peso: 10},
-  { nome: "Melão Orange", peso: 10},
-  { nome: "Melão Amarelo Rei", peso: 10},
-  { nome: "Melão Samba", peso: 13},
-  { nome: "Maça Monica", peso: 18},
-  { nome: "Uva Red KG", peso: 8},
-  { nome: "Uva Verde Thompson KG", peso: 8},
-  { nome: "Maçã Pink", peso: 18},
-  { nome: "Cebolinha Emb 1kg", peso: 1},
-  { nome: "Batatinha Emb 1kg", peso: 1},
-  { nome: "Palmito", peso: 1},
-  { nome: "Manga Tommy", peso: 1},
-  { nome: "Manga Palmer", peso: 1},  
-  { nome: "Pera Forele", peso: 0}, // corrigir esse
-  { nome: "Pera Danjou", peso: 0}, // corrigir esse
-  { nome: "Cajá", peso: 0}, // sem uso
-  { nome: "Pessego Nacional", peso: 6}, // verificar
-  { nome: "Pessego Importado", peso: 6}, // verificar
-  { nome: "Caqui", peso: 0}, // sem uso
-  { nome: "Nectarina", peso: 9},
-  { nome: "Ameixa Importada", peso: 0}, // verificar
-  { nome: "Ameixa Embalada", peso: 20},
-  { nome: "Kiwi", peso: 9},
-  { nome: "Kiwi Embalado", peso: 20},
-  { nome: "Laranja Lima", peso: 20}, // verificar
-  { nome: "Laranja Bahia", peso: 15},
-  { nome: "Maca Argentina", peso: 9},
-  { nome: "Maca Nacional", peso: 18},
-  { nome: "Maca Verde", peso: 9},
-  { nome: "Maca Pequena", peso: 18},
-  { nome: "Pera Portuguesa", peso: 18}, // verificar 
-  { nome: "Uva Crimson", peso: 10},
-  { nome: "Uva Italia", peso: 10},
-  { nome: "Uva Red Gloob", peso: 10},
-  { nome: "Uva Rosada", peso: 10},
-  { nome: "Uva Benitaka", peso: 10},
-  { nome: "Uva Vitoria", peso: 10},
-  { nome: "Uva Vitoria 250g", peso: 20},
-  { nome: "Uva Thompson", peso: 10},
-  { nome: "Uva Jubilee", peso: 10},
-  
+  <div class="area-botao">
+    <button onclick="gerarLista()" class="btn-gerarListaCod">
+      📋 Gerar Lista</button>
+  </div>
 
 
-];
+<footer>Ferramenta criada por Dionata Pedro ® Abril 2026</footer>
+  <script>
+    const produtos = [
+      { nome: "Abacate", peso: 18, codigo: 49 },
+      { nome: "Abobrinha Princesa", peso: 18, codigo: 5 },
+      { nome: "Abobrinha Verde", peso: 18, codigo: 6 },
+      { nome: "Alho Poró", peso: 1, codigo: 134 },
+      { nome: "Banana Nanica", peso: 20, codigo: 56 },
+      { nome: "Banana Ouro", peso: 20, codigo: 57 },
+      { nome: "Banana Prata", peso: 20, codigo: 58 },
+      { nome: "Banana Terra", peso: 20, codigo: 53 },
+      { nome: "Bucha Vegetal", peso: 1, codigo: 30810 },
+      { nome: "Batata Doce", peso: 20, codigo: 8 },
+      { nome: "Acafrão", peso: 1, codigo: 180 },
+      { nome: "Berinjela", peso: 10, codigo: 14 },
+      { nome: "Beterraba", peso: 20, codigo: 15 },
+      { nome: "Goiaba", peso: 18, codigo: 69 },
+      { nome: "Jiló", peso: 14, codigo: 29 },
+      { nome: "Limao Tahiti", peso: 20, codigo: 80 },
+      { nome: "Limao Doce", peso: 18, codigo: 81 },
+      { nome: "Mandioca", peso: 18, codigo: 30 },
+      { nome: "Mamão Avai", peso: 10, codigo: 87 },
+      { nome: "Mamão Formoso", peso: 10, codigo: 88 },
+      { nome: "Maracujá", peso: 1, codigo: 93 },
+      { nome: "Mexerica Pokan", peso: 16, codigo: 101 },
+      { nome: "Pinha-Atemoia", peso: 1, codigo: 110 },
+      { nome: "Cará Branco", peso: 18, codigo: 19 },
+      { nome: "Batata Doce Branca", peso: 20, codigo: 233 },
+      { nome: "Hortelã", peso: 1, codigo: 142 },
+      { nome: "Mexerica Bergamota", peso: 10, codigo: 102 },
+      { nome: "Carambola", peso: 6, codigo: 63 },
+      { nome: "Chuchu", peso: 20, codigo: 24 },
+      { nome: "Gengibre", peso: 18, codigo: 27 },
+      { nome: "Pimentão Colorido", peso: 10, codigo: 40 },
+      { nome: "Pepino", peso: 18, codigo: 34 },
+      { nome: "Pepino Japonês", peso: 18, codigo: 35 },
+      { nome: "Inhame", peso: 20, codigo: 28 },
+      { nome: "Repolho", peso: 15, codigo: 43 },
+      { nome: "Repolho Roxo", peso: 15, codigo: 44 },
+      { nome: "Tomate Cereja", peso: 20, codigo: 46 },
+      { nome: "Vagem", peso: 10, codigo: 47 },
+      { nome: "Vagem Verde", peso: 10, codigo: 48 },
+      { nome: "Ovos Codorna", peso: 20, codigo: 15559 },
+      { nome: "Ovos Codorna Balde", peso: 1, codigo: 15557 },
+      { nome: "Ovos Sacola", peso: 1, codigo: 15555 },
+      { nome: "Coco Seco", peso: 20, codigo: 65 },
+      { nome: "Coco Verde", peso: 1, codigo: 66 },
+      { nome: "Abacaxi", peso: 1, codigo: 50 },
+      { nome: "Mexerica Comum", peso: 1, codigo: 99 }, // vericar peso
+      { nome: "Palmito", peso: 1, codigo: 33 },
+      { nome: "Milho Verde Bdj", peso: 1, codigo: 187 },
+      { nome: "Graviola", peso: 8, codigo: 70 },
+      { nome: "Manga Ouro", peso: 18, codigo: 92 },
+      { nome: "Pimenta Dedo de Moça", peso: 1, codigo: 37 },
+      { nome: "Abobora Jacaré", peso: 40, codigo: 1 },
+      { nome: "Abobora Japonesa", peso: 40, codigo: 2 },
+      { nome: "Abobora Maranhão", peso: 40, codigo: 3 },
+      { nome: "Melancia", peso: 1, codigo: 95 },
+      { nome: "Melancia Baby", peso: 16, codigo: 96 },
+      { nome: "Batata Roxa", peso: 25, codigo: 11 },
+      { nome: "Batata Inglesa", peso: 25, codigo: 9 },
+      { nome: "Batatinha", peso: 25, codigo: 10 },
+      { nome: "Cebola Pequena", peso: 20, codigo: 21 },
+      { nome: "Cebola Grande", peso: 20, codigo: 20 },
+      { nome: "Cenoura", peso: 20, codigo: 23 },
+      { nome: "Alho Importado", peso: 10 },
+      { nome: "Alho Nacional", peso: 10, codigo: 148 },
+      { nome: "Cebola Roxa", peso: 20, codigo: 22 },
+      { nome: "Alho Embalado", peso: 15 },
+      { nome: "Amendoim torrado c/ casca", peso: 10 },
+      { nome: "Amendoim c/ casca", peso: 10 },
+      { nome: "Melão Sapo", peso: 13 },
+      { nome: "Melão Dino", peso: 10 },
+      { nome: "Melão Cepi Amarelo", peso: 10 },
+      { nome: "Melão Meluna", peso: 10 },
+      { nome: "Melão Famosa", peso: 10 },
+      { nome: "Melão Orange", peso: 10 },
+      { nome: "Melão Amarelo Rei", peso: 10 },
+      { nome: "Melão Samba", peso: 13 },
+      { nome: "Maça Monica", peso: 18 },
+      { nome: "Uva Red KG", peso: 8, extra: 0.25 },
+      { nome: "Uva Verde Thompson KG", peso: 8, extra: 0.25 },
+      { nome: "Maçã Pink", peso: 18 },
+      { nome: "Cebolinha Emb 1kg", peso: 1 },
+      { nome: "Batatinha Emb 1kg", peso: 1 },
+      { nome: "Palmito", peso: 1 },
+      { nome: "Manga Tommy", peso: 1, codigo: 89 },
+      { nome: "Manga Palmer", peso: 1, codigo: 91 },
+      { nome: "Pera Williams", peso: 18, },
+      { nome: "Pera Forele", peso: 0 }, // corrigir esse
+      { nome: "Pera Danjou", peso: 18 },
+      { nome: "Cajá", peso: 0 }, // sem uso
+      { nome: "Pessego Nacional", peso: 6 }, // verificar
+      { nome: "Pessego Importado", peso: 6 }, // verificar
+      { nome: "Caqui", peso: 0 }, // sem uso
+      { nome: "Nectarina", peso: 9, codigo: 104 },
+      { nome: "Ameixa Importada", peso: 9 },
+      { nome: "Ameixa Embalada", peso: 20 },
+      { nome: "Kiwi", peso: 9, codigo: 74 },
+      { nome: "Kiwi Embalado", peso: 20 },
+      { nome: "Laranja Lima", peso: 20, codigo: 77 },
+      { nome: "Laranja Pera", peso: 20, codigo: 78 },
+      { nome: "Laranja Bahia", peso: 15, codigo: 78 },
+      { nome: "Maca Argentina", peso: 9, codigo: 86 },
+      { nome: "Maca Nacional", peso: 18, codigo: 85 },
+      { nome: "Maca Verde", peso: 9, codigo: 84 },
+      { nome: "Maca Pequena", peso: 18, codigo: 83 },
+      { nome: "Pera Portuguesa", peso: 10 }, // verificar 
+      { nome: "Uva Crimson 500g", peso: 10 },
+      { nome: "Uva Italia 500g", peso: 10 },
+      { nome: "Uva Red Gloob 500g", peso: 10 },
+      { nome: "Uva Rosada 500g", peso: 10 },
+      { nome: "Uva Benitaka 500g", peso: 10 },
+      { nome: "Uva Vitoria 500g", peso: 10 },
+      { nome: "Uva Vitoria 250g", peso: 20 },
+      { nome: "Uva Thompson 500g", peso: 10 },
+      { nome: "Uva Jubilee 500g", peso: 10 },
+    ];
 
-// arredondar final 9
-function arredondarPara9(valor) {
-  let inteiro = Math.floor(valor);
-  let centavos = Math.round((valor - inteiro) * 100);
 
-  if (centavos % 10 === 9) return valor.toFixed(2);
+    function arredondar(valor) {
+      let inteiro = Math.floor(valor);
+      let centavos = Math.round((valor - inteiro) * 100);
+      let novo = Math.floor(centavos / 10) * 10 + 9;
 
-  let novoCentavo = Math.floor(centavos / 10) * 10 + 9;
+      if (novo > 99) {
+        inteiro++;
+        novo = 9;
+      }
 
-  if (novoCentavo > 99) {
-    inteiro += 1;
-    novoCentavo = 9;
-  }
+      return (inteiro + novo / 100).toFixed(2);
+    }
 
-  return (inteiro + novoCentavo / 100).toFixed(2);
-}
+    function calcular(valor, peso, extra = 0) {
+      if (!peso || peso === 0) {
+        return { custo: "-", venda: "-", atacado: "-" }
+      }
 
-// cálculo
-function calcular(valor, peso) {
-  let custo = valor / peso;
-  let varejo = arredondarPara9(custo * 1.45);
-  let atacado = (valor * 1.40) / peso;
+      let custo = valor / peso;
 
-  return {
-    custo: custo.toFixed(2),
-    varejo,
-    atacado: atacado.toFixed(2)
-  };
-}
+      // margem padrão 45%
+      let vendaBase = custo * 1.45;
 
-const tabela = document.getElementById("tabela");
+      // aplica extra (se existir)
+      let vendaFinal = vendaBase * (1 + extra);
 
-produtos.forEach((produto, index) => {
-  const tr = document.createElement("tr");
+      let venda = arredondar(vendaFinal);
+      let atacado = (valor * 1.4) / peso;
 
-  tr.innerHTML = `
-    <td>${produto.nome}</td>
-    <td><input type="number" id="input-${index}"></td>
-    <td class="custo" id="custo-${index}">-</td>
-    <td class="varejo" id="varejo-${index}">-</td>
-    <td class="atacado" id="atacado-${index}">-</td>
+      return {
+        custo: custo.toFixed(2).replace(".", ","),
+        venda: venda.replace(".", ","),
+        atacado: atacado.toFixed(2).replace(".", ",")
+      }
+    }
+
+    const tabela = document.getElementById("tabela");
+
+    produtos.forEach((p, i) => {
+      let tr = document.createElement("tr");
+
+      tr.innerHTML = `
+    <td>${p.codigo !== undefined ? p.codigo : "-"}</td>
+    <td>${p.nome}</td>
+    <td><input type="number"></td>
+    <td id="c${i}">-</td>
+    <td id="v${i}">-</td>
+    <td id="a${i}">-</td>
+    <td><button onclick="limparLinha(${i})">🗑</button></td>
   `;
 
-  tabela.appendChild(tr);
+      tabela.appendChild(tr);
 
-  const input = tr.querySelector("input");
+      // ✅ PEGA O INPUT (ESSENCIAL)
+      let input = tr.querySelector("input");
 
-  // 🔥 CARREGAR SALVO
-  const valorSalvo = localStorage.getItem(`produto-${index}`);
-  if (valorSalvo) {
-    input.value = valorSalvo;
+      // 🔄 CARREGAR ao abrir
+      let salvo = localStorage.getItem("produto-" + i);
 
-    const resultado = calcular(parseFloat(valorSalvo), produto.peso);
+      if (salvo) {
+        input.value = salvo;
 
-    document.getElementById(`custo-${index}`).innerText = resultado.custo;
-    document.getElementById(`varejo-${index}`).innerText = resultado.varejo;
-    document.getElementById(`atacado-${index}`).innerText = resultado.atacado;
-  }
+        let r = calcular(parseFloat(salvo), p.peso);
 
-  // 🔥 SALVAR AO DIGITAR
-  input.addEventListener("input", () => {
-    const valor = parseFloat(input.value);
-    if (!valor) return;
+        document.getElementById("c" + i).innerText = r.custo;
+        document.getElementById("v" + i).innerText = r.venda;
+        document.getElementById("a" + i).innerText = r.atacado;
+      }
 
-    const resultado = calcular(valor, produto.peso);
+      // 💾 SALVAR ao digitar
+      input.addEventListener("input", () => {
+        let val = parseFloat(input.value);
 
-    document.getElementById(`custo-${index}`).innerText = resultado.custo;
-    document.getElementById(`varejo-${index}`).innerText = resultado.varejo;
-    document.getElementById(`atacado-${index}`).innerText = resultado.atacado;
+        if (!val) {
+          localStorage.removeItem("produto-" + i);
+          return;
+        }
 
-    localStorage.setItem(`produto-${index}`, valor);
-  });
-});
+        let r = calcular(val, p.peso, p.extra);
 
-// 🔍 BUSCA
-const busca = document.getElementById("busca");
+        document.getElementById("c" + i).innerText = r.custo;
+        document.getElementById("v" + i).innerText = r.venda;
+        document.getElementById("a" + i).innerText = r.atacado;
 
-busca.addEventListener("input", () => {
-  const termo = busca.value.toLowerCase();
-  const linhas = document.querySelectorAll("#tabela tr");
+        localStorage.setItem("produto-" + i, val);
+      });
+    });
+    
 
-  linhas.forEach(linha => {
-    const nomeProduto = linha.children[0].innerText.toLowerCase();
-    linha.style.display = nomeProduto.includes(termo) ? "" : "none";
-  });
-});
+    // busca
+    document.getElementById("busca").addEventListener("input", function () {
+      let termo = this.value.toLowerCase();
 
-function limparDados() {
-  const confirmar = confirm("Tem certeza que deseja apagar todos os dados?");
+      document.querySelectorAll("#tabela tr").forEach(l => {
+        let nome = l.children[1].innerText.toLowerCase();
+        l.style.display = nome.includes(termo) ? "" : "none";
+      });
+    });
 
-  if (confirmar) {
-    localStorage.clear();
-    location.reload();
-  }
-}
-</script>
+    function limpar() {
+      if (confirm("Deseja apagar todos os dados?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    function limparLinha(i) {
+      if (!confirm("Limpar este item?")) return;
+
+      // limpa input
+      let input = document.querySelector(`#tabela tr:nth-child(${i + 1}) input`);
+      input.value = "";
+
+      // limpa valores
+      document.getElementById("c" + i).innerText = "-";
+      document.getElementById("v" + i).innerText = "-";
+      document.getElementById("a" + i).innerText = "-";
+
+      // remove do localStorage
+      localStorage.removeItem("produto-" + i);
+    }
+    function gerarLista() {
+      let lista = "";
+
+      produtos.forEach((p, i) => {
+        let codigo = p.codigo !== undefined ? p.codigo : "-";
+        let input = document.querySelector(`#tabela tr:nth-child(${i + 1}) input`);
+
+        // 👉 se quiser só os que foram preenchidos
+        if (input.value) {
+          lista += `${codigo} - ${p.nome}\n`;
+        }
+
+        // 👉 se quiser TODOS (usa isso no lugar do if)
+        // lista += `${codigo} - ${p.nome}\n`;
+      });
+
+      if (!lista) {
+        alert("Nenhum item preenchido!");
+        return;
+      }
+
+      // copia automaticamente
+      navigator.clipboard.writeText(lista);
+
+      alert("Lista copiada!");
+    }
+
+  </script>
 
 </body>
+
 </html>
